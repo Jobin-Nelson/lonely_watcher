@@ -35,13 +35,17 @@ mod tests {
     use super::*;
     fn test_backup(count: u32) {
         let test_dir = PathBuf::from("test_dir");
+        let _ = std::fs::remove_dir_all(&test_dir);
         std::fs::create_dir(&test_dir).unwrap();
         let test_file = test_dir.join("test.txt");
-        std::fs::File::create(&test_file).unwrap();
-        for _ in 1..=count {
+        for i in 1..=count {
+            std::fs::File::create(&test_file).unwrap();
             backup_file(&test_file);
-            assert!(test_file.with_extension(format!("txt-{}", count)).exists());
+            let expected_file = test_file.with_extension(format!("txt-{}", i));
+            assert!(expected_file.exists());
         }
+        assert!(!test_file.exists());
+        assert!(!test_file.with_extension(format!("txt-{}", count+1)).exists());
         std::fs::remove_dir_all(&test_dir).unwrap();
     }
     #[test]
@@ -54,6 +58,6 @@ mod tests {
     }
     #[test]
     fn backup_three_file() {
-        test_backup(1);
+        test_backup(3);
     }
 }

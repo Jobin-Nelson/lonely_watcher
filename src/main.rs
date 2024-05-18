@@ -9,7 +9,7 @@ fn main() {
         cli::Commands::Log { log_file } => {
             sys_monitor::log_perf(log_file);
         }
-        cli::Commands::Stat { log_file } => {
+        cli::Commands::Stat { log_file: _ } => {
             todo!()
         }
     }
