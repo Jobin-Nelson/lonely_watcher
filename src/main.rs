@@ -18,7 +18,7 @@ fn main() -> Result<()> {
 }
 
 fn log_perf(args: &cli::Args, log_file: &Path) -> Result<()> {
-    utils::backup_file(log_file)?;
+    log_file.exists().then(|| utils::backup_file(log_file));
 
     LoggerBuilder::new()
         .with_duration(args.duration)

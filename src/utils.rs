@@ -1,5 +1,5 @@
-use std::path::Path;
 use crate::prelude::*;
+use std::path::Path;
 
 pub fn backup_file(log_file: &Path) -> Result<()> {
     let mut backup_file = log_file.to_path_buf();
@@ -11,25 +11,24 @@ pub fn backup_file(log_file: &Path) -> Result<()> {
         ));
         (!backup_file.exists()).then(|| backup_file.clone())
     };
-    (1..)
-        .find_map(get_new_backup_file)
-        .and_then(|backup_file| {
-            println!(
-                "Backing up {} to {}",
-                log_file.display(),
-                backup_file.display()
-            );
-            std::fs::rename(log_file, backup_file).ok()
-        })
-        .ok_or("Could not backup file".into())
+    let new_backup_file = (1..).find_map(get_new_backup_file);
+    match new_backup_file {
+        Some(b) => {
+            println!("Backup up {log_file:?} to {b:?}");
+            std::fs::rename(log_file, b).map_err(Error::Io)
+        },
+        None => Err(Error::BackupFailed {
+            source_file: log_file.to_path_buf(),
+            destination_file: new_backup_file,
+        }),
+    }
 }
-
 
 #[cfg(test)]
 mod tests {
 
-    use std::path::PathBuf;
     use super::*;
+    use std::path::PathBuf;
     fn test_backup(count: u32) {
         let test_dir = PathBuf::from("test_dir");
         let _ = std::fs::remove_dir_all(&test_dir);
@@ -59,6 +58,4 @@ mod tests {
     fn backup_three_file() {
         test_backup(3);
     }
-
-
 }

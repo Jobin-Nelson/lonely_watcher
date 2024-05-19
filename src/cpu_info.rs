@@ -3,9 +3,10 @@ use std::{io::{BufRead, BufReader}, num::ParseIntError, str::FromStr};
 
 const STAT_FILE_PATH: &str = "/proc/stat";
 
+#[derive(Debug, PartialEq)]
 pub struct CpuInfo {
-    idle_time: usize,
-    non_idle_time: usize,
+    pub idle_time: usize,
+    pub non_idle_time: usize,
 }
 
 impl FromStr for CpuInfo {
@@ -15,10 +16,10 @@ impl FromStr for CpuInfo {
         let (idle_time, non_idle_time) = s.split_whitespace()
             .skip(1)
             .enumerate()
-            .fold((0, 0), |acc, w| {
+            .fold((0, 0), |mut acc, w| {
                 match w.0 {
-                    2|3 => acc.0 + w.1.parse::<usize>().unwrap(),
-                    _ =>  acc.1 + w.1.parse::<usize>().unwrap(),
+                    3|4 => acc.0 += w.1.parse::<usize>().unwrap(),
+                    _ =>  acc.1 += w.1.parse::<usize>().unwrap(),
                 };
                 acc
             });
@@ -60,3 +61,17 @@ impl Iterator for CpuInfoIterator {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_cpu_info_parse() {
+        let input = "cpu  770783 692 470657 25913724 58979 93595 25985 0 0 0".to_string();
+        let expected = CpuInfo {
+            idle_time: 25972703,
+            non_idle_time: 1361712,
+        };
+
+        assert_eq!(input.parse::<CpuInfo>().unwrap(), expected);
+    }
+}

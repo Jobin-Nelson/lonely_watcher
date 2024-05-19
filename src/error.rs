@@ -1,4 +1,5 @@
 use derive_more::From;
+use std::path::PathBuf;
 
 // pub type Error = Box<dyn std::error::Error>;
 
@@ -6,6 +7,12 @@ use derive_more::From;
 pub enum Error {
     #[from]
     Custom(String),
+
+    #[from]
+    BackupFailed{
+        source_file: PathBuf,
+        destination_file: Option<PathBuf>,
+    },
 
     #[from]
     Io(std::io::Error),

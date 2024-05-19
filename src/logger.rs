@@ -1,6 +1,7 @@
 #![allow(unused)]
 
 use std::path::{Path, PathBuf};
+use std::thread::sleep;
 
 use crate::prelude::*;
 use crate::utils;
@@ -49,8 +50,9 @@ impl LoggerBuilder<LoggerWithLogFile> {
             let cpu_info = cpu_info_iter
                 .next()
                 .expect("Could not get cpu info");
+            println!("{cpu_info:?}");
+            sleep(std::time::Duration::from_secs(self.interval.unwrap_or(5) as u64))
         }
-        Ok(())
     }
 }
 
