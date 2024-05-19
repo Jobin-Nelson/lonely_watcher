@@ -1,5 +1,9 @@
-use std::{io::{BufRead, BufReader}, num::ParseIntError, str::FromStr};
+use std::{
+    io::{BufRead, BufReader},
+    str::FromStr,
+};
 
+use crate::Error;
 
 const STAT_FILE_PATH: &str = "/proc/stat";
 
@@ -10,19 +14,23 @@ pub struct CpuInfo {
 }
 
 impl FromStr for CpuInfo {
-    type Err = ParseIntError;
+    type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let (idle_time, non_idle_time) = s.split_whitespace()
-            .skip(1)
-            .enumerate()
-            .fold((0, 0), |mut acc, w| {
-                match w.0 {
-                    3|4 => acc.0 += w.1.parse::<usize>().unwrap(),
-                    _ =>  acc.1 += w.1.parse::<usize>().unwrap(),
-                };
-                acc
-            });
+        if !s.trim_start().starts_with("cpu ") {
+            return Err(Error::ParseCpuError);
+        }
+        let (idle_time, non_idle_time) =
+            s.split_whitespace()
+                .skip(1)
+                .enumerate()
+                .fold((0, 0), |mut acc, w| {
+                    match w.0 {
+                        3 | 4 => acc.0 += w.1.parse::<usize>().unwrap(),
+                        _ => acc.1 += w.1.parse::<usize>().unwrap(),
+                    };
+                    acc
+                });
 
         Ok(Self {
             idle_time,
@@ -47,10 +55,9 @@ impl Iterator for CpuInfoIterator {
         let stat_file = std::fs::File::open(STAT_FILE_PATH).unwrap();
         let reader = BufReader::new(stat_file);
 
-        let aggregate_cpu_line = reader.lines()
-            .find_map(|l| {
-                let line = l.unwrap();
-                line.starts_with("cpu ").then_some(line)
+        let aggregate_cpu_line = reader.lines().find_map(|l| {
+            let line = l.unwrap();
+            line.starts_with("cpu ").then_some(line)
         });
 
         let cpu_info: CpuInfo = aggregate_cpu_line
@@ -73,5 +80,14 @@ mod tests {
         };
 
         assert_eq!(input.parse::<CpuInfo>().unwrap(), expected);
+    }
+
+    #[test]
+    fn test_cpu_info_parse_empty_line() {
+        let input = "".to_string();
+
+        assert!(input
+            .parse::<CpuInfo>()
+            .is_err_and(|e| { matches!(e, Error::ParseCpuError) }));
     }
 }

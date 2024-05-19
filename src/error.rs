@@ -8,12 +8,12 @@ pub enum Error {
     #[from]
     Custom(String),
 
-    #[from]
     BackupFailed{
         source_file: PathBuf,
         destination_file: Option<PathBuf>,
     },
-
+    ParseMemError(String),
+    ParseCpuError,
     #[from]
     Io(std::io::Error),
 }

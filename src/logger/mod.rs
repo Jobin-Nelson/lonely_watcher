@@ -1,11 +1,13 @@
-#![allow(unused)]
-
 use std::path::{Path, PathBuf};
 use std::thread::sleep;
 
 use crate::prelude::*;
 use crate::utils;
-use crate::cpu_info::CpuInfoIterator;
+use cpu_info::CpuInfoIterator;
+
+
+pub mod cpu_info;
+pub mod mem_info;
 
 pub struct LoggerWithLogFile {
     log_file: PathBuf,
