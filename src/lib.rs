@@ -1,14 +1,19 @@
 use std::path::PathBuf;
 
+pub mod logger;
+
 pub fn log_perf(log_file: &PathBuf) {
     log_file.exists().then(|| backup_file(log_file));
 }
 
 fn backup_file(log_file: &PathBuf) {
-
     let mut backup_file = log_file.clone();
     let get_new_backup_file = |i: i64| {
-        backup_file.set_extension(format!("{}-{}", log_file.extension().unwrap().to_string_lossy(), i));
+        backup_file.set_extension(format!(
+            "{}-{}",
+            log_file.extension().unwrap().to_string_lossy(),
+            i
+        ));
         (!backup_file.exists()).then(|| backup_file.clone())
     };
     (1..)
@@ -45,7 +50,9 @@ mod tests {
             assert!(expected_file.exists());
         }
         assert!(!test_file.exists());
-        assert!(!test_file.with_extension(format!("txt-{}", count+1)).exists());
+        assert!(!test_file
+            .with_extension(format!("txt-{}", count + 1))
+            .exists());
         std::fs::remove_dir_all(&test_dir).unwrap();
     }
     #[test]
