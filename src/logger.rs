@@ -1,6 +1,70 @@
-pub struct Logger {
+use std::path::{Path, PathBuf};
+
+pub struct LoggerWithLogFile;
+pub struct LoggerWithoutLogFile;
+
+
+#[derive(Debug)]
+pub struct LoggerBuilder<State=LoggerWithoutLogFile> {
     duration: Option<usize>,
-    interval: usize,
-    cpu_threshold: usize,
-    mem_threshold: usize,
+    interval: Option<usize>,
+    cpu_threshold: Option<usize>,
+    mem_threshold: Option<usize>,
+    log_file: Option<PathBuf>,
+    state: std::marker::PhantomData<State>,
 }
+
+impl Default for LoggerBuilder<LoggerWithoutLogFile> {
+    fn default() -> Self {
+        Self {
+            duration: Default::default(),
+            interval: Default::default(),
+            cpu_threshold: Default::default(),
+            mem_threshold: Default::default(),
+            log_file: Default::default(),
+            state: std::marker::PhantomData,
+        }
+    }
+}
+
+impl LoggerBuilder {
+    pub fn new() -> LoggerBuilder<LoggerWithoutLogFile> {
+        Default::default()
+    }
+}
+
+impl LoggerBuilder<LoggerWithLogFile> {
+    pub fn run(self) {
+        todo!()
+    }
+}
+
+impl<State> LoggerBuilder<State> {
+    pub fn with_duration(mut self, duration: Option<usize>) -> Self {
+        self.duration = duration;
+        self
+    }
+    pub fn with_interval(mut self, interval: usize) -> Self {
+        let _ = self.interval.insert(interval);
+        self
+    }
+    pub fn with_cpu_threshold(mut self, cpu_threshold: usize) -> Self {
+        let _ = self.cpu_threshold.insert(cpu_threshold);
+        self
+    }
+    pub fn with_mem_threshold(mut self, mem_threshold: usize) -> Self {
+        let _ = self.mem_threshold.insert(mem_threshold);
+        self
+    }
+    pub fn with_log_file(self, log_file: &Path) -> LoggerBuilder<LoggerWithLogFile> {
+        LoggerBuilder {
+            duration: self.duration,
+            interval: self.interval,
+            cpu_threshold: self.cpu_threshold,
+            mem_threshold: self.mem_threshold,
+            log_file: Some(log_file.into()),
+            state: std::marker::PhantomData::<LoggerWithLogFile>,
+        }
+    }
+}
+
