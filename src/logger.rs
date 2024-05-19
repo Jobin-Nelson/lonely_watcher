@@ -1,17 +1,23 @@
+#![allow(unused)]
+
 use std::path::{Path, PathBuf};
 
-pub struct LoggerWithLogFile;
+use crate::prelude::*;
+use crate::utils;
+use crate::cpu_info::CpuInfoIterator;
+
+pub struct LoggerWithLogFile {
+    log_file: PathBuf,
+}
 pub struct LoggerWithoutLogFile;
 
-
 #[derive(Debug)]
-pub struct LoggerBuilder<State=LoggerWithoutLogFile> {
+pub struct LoggerBuilder<State = LoggerWithoutLogFile> {
     duration: Option<usize>,
     interval: Option<usize>,
     cpu_threshold: Option<usize>,
     mem_threshold: Option<usize>,
-    log_file: Option<PathBuf>,
-    state: std::marker::PhantomData<State>,
+    state: State,
 }
 
 impl Default for LoggerBuilder<LoggerWithoutLogFile> {
@@ -21,8 +27,7 @@ impl Default for LoggerBuilder<LoggerWithoutLogFile> {
             interval: Default::default(),
             cpu_threshold: Default::default(),
             mem_threshold: Default::default(),
-            log_file: Default::default(),
-            state: std::marker::PhantomData,
+            state: LoggerWithoutLogFile,
         }
     }
 }
@@ -34,8 +39,18 @@ impl LoggerBuilder {
 }
 
 impl LoggerBuilder<LoggerWithLogFile> {
-    pub fn run(self) {
-        todo!()
+    pub fn run(self) -> Result<()> {
+        let log_file = self.state.log_file;
+        if log_file.exists() {
+            utils::backup_file(&log_file)?;
+        }
+        let mut cpu_info_iter = CpuInfoIterator::new();
+        loop {
+            let cpu_info = cpu_info_iter
+                .next()
+                .expect("Could not get cpu info");
+        }
+        Ok(())
     }
 }
 
@@ -62,9 +77,11 @@ impl<State> LoggerBuilder<State> {
             interval: self.interval,
             cpu_threshold: self.cpu_threshold,
             mem_threshold: self.mem_threshold,
-            log_file: Some(log_file.into()),
-            state: std::marker::PhantomData::<LoggerWithLogFile>,
+            state: {
+                LoggerWithLogFile {
+                    log_file: log_file.to_path_buf(),
+                }
+            },
         }
     }
 }
-

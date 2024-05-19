@@ -1,8 +1,8 @@
-use std::path::PathBuf;
+use std::path::Path;
 use crate::prelude::*;
 
-pub fn backup_file(log_file: &PathBuf) -> Result<()> {
-    let mut backup_file = log_file.clone();
+pub fn backup_file(log_file: &Path) -> Result<()> {
+    let mut backup_file = log_file.to_path_buf();
     let get_new_backup_file = |i: i64| {
         backup_file.set_extension(format!(
             "{}-{}",
@@ -28,6 +28,7 @@ pub fn backup_file(log_file: &PathBuf) -> Result<()> {
 #[cfg(test)]
 mod tests {
 
+    use std::path::PathBuf;
     use super::*;
     fn test_backup(count: u32) {
         let test_dir = PathBuf::from("test_dir");
