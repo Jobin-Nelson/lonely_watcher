@@ -29,8 +29,8 @@ mod tests {
 
     use super::*;
     use std::path::PathBuf;
-    fn test_backup(count: u32) {
-        let test_dir = PathBuf::from("test_dir");
+    fn test_backup(test_dir: &str, count: u32) {
+        let test_dir = PathBuf::from(test_dir);
         let _ = std::fs::remove_dir_all(&test_dir);
         std::fs::create_dir(&test_dir).unwrap();
         let test_file = test_dir.join("test.txt");
@@ -48,14 +48,14 @@ mod tests {
     }
     #[test]
     fn backup_one_file() {
-        test_backup(1);
+        test_backup("test_dir_1", 1);
     }
     #[test]
     fn backup_two_file() {
-        test_backup(2);
+        test_backup("test_dir_2", 2);
     }
     #[test]
     fn backup_three_file() {
-        test_backup(3);
+        test_backup("test_dir_3", 3);
     }
 }
