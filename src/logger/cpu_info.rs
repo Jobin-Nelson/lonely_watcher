@@ -52,7 +52,7 @@ impl Iterator for CpuInfoIterator {
     type Item = CpuInfo;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let stat_file = std::fs::File::open(STAT_FILE_PATH).unwrap();
+        let stat_file = std::fs::File::open(STAT_FILE_PATH).expect("Could not open /proc/stat");
         let reader = BufReader::new(stat_file);
 
         let aggregate_cpu_line = reader.lines().find_map(|l| {

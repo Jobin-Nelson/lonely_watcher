@@ -18,43 +18,31 @@ impl FromStr for MemInfo {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let get_mem_value = |s: &str| {
-            s.split_whitespace()
+        let get_mem_value = |line: Option<&str>, prefix: &str| {
+            let line = line.ok_or_else(|| {
+                Error::ParseMemError(format!("Expected {prefix}, got empty line"))
+            })?;
+            if !line.starts_with(prefix) {
+                return Err(Error::ParseMemError(format!(
+                    "Expected {prefix}, got {line}"
+                )));
+            };
+            line.split_whitespace()
                 .nth(1)
                 .unwrap()
                 .parse::<usize>()
-                .map_err(|e| Error::ParseMemError(format!("Expected integer, failed due to {e}")))
+                .map_err(|e| {
+                    Error::ParseMemError(format!(
+                        "Expected integer value for {prefix}, failed due to {e}"
+                    ))
+                })
         };
-        let mut total_mem = 0;
-        let mut free_mem = 0;
-        let mut available_mem = 0;
 
-        let mut found = [0; 3];
+        let mut lines_iter = s.lines().take(3);
 
-        for line in s.lines() {
-            match line.split_whitespace().next() {
-                Some("MemTotal:") => {
-                    found[0] = 1;
-                    total_mem = get_mem_value(line)?
-                }
-                Some("MemFree:") => {
-                    found[1] = 1;
-                    free_mem = get_mem_value(line)?
-                }
-                Some("MemAvailable:") => {
-                    found[2] = 1;
-                    available_mem = get_mem_value(line)?
-                }
-                _ => continue,
-            }
-        }
-        let number_of_meminfo_values_found: u32 = found.iter().sum();
-
-        if number_of_meminfo_values_found != 3 {
-            return Err(Error::ParseMemError(format!(
-                "Expected 3 mem info values, {number_of_meminfo_values_found}"
-            )));
-        }
+        let total_mem = get_mem_value(lines_iter.next(), "MemTotal:")?;
+        let free_mem = get_mem_value(lines_iter.next(), "MemFree:")?;
+        let available_mem = get_mem_value(lines_iter.next(), "MemAvailable:")?;
 
         Ok(Self {
             total_mem,
@@ -77,10 +65,16 @@ impl Iterator for MemInfoIterator {
     type Item = MemInfo;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let stat_file = std::fs::File::open(MEMINFO_FILE_PATH).unwrap();
+        let stat_file =
+            std::fs::File::open(MEMINFO_FILE_PATH).expect("Could not open /proc/meminfo");
         let reader = BufReader::new(stat_file);
-        let meminfo_string: String = reader.lines().map(|l| l.unwrap()).take(10).collect();
-        let meminfo: MemInfo = meminfo_string.parse().unwrap();
+        let meminfo = reader
+            .lines()
+            .map(|l| l.unwrap())
+            .take(3)
+            .collect::<String>()
+            .parse::<MemInfo>()
+            .unwrap();
         Some(meminfo)
     }
 }
@@ -90,8 +84,7 @@ mod tests {
     use super::*;
     #[test]
     fn test_mem_parse() {
-        let input = r#"
-MemTotal:       16244496 kB
+        let input = r#"MemTotal:       16244496 kB
 MemFree:         5714272 kB
 MemAvailable:   10846148 kB
         "#;
@@ -105,8 +98,7 @@ MemAvailable:   10846148 kB
     }
     #[test]
     fn test_mem_parse_additional_lines() {
-        let input = r#"
-MemTotal:       16244496 kB
+        let input = r#"MemTotal:       16244496 kB
 MemFree:         5714272 kB
 MemAvailable:   10846148 kB
 Buffers:          330816 kB
@@ -128,8 +120,7 @@ Active(file):    1256916 kB
     }
     #[test]
     fn test_mem_parse_not_enough_lines() {
-        let input = r#"
-MemTotal:       16244496 kB
+        let input = r#"MemTotal:       16244496 kB
 MemFree:         5714272 kB
         "#;
         let actual = input.parse::<MemInfo>();

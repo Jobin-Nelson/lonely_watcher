@@ -3,8 +3,9 @@ use std::thread::sleep;
 
 use crate::prelude::*;
 use crate::utils;
-use cpu_info::CpuInfoIterator;
 
+use self::cpu_info::CpuInfoIterator;
+use self::mem_info::MemInfoIterator;
 
 pub mod cpu_info;
 pub mod mem_info;
@@ -12,27 +13,16 @@ pub mod mem_info;
 pub struct LoggerWithLogFile {
     log_file: PathBuf,
 }
+#[derive(Default)]
 pub struct LoggerWithoutLogFile;
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct LoggerBuilder<State = LoggerWithoutLogFile> {
     duration: Option<usize>,
     interval: Option<usize>,
     cpu_threshold: Option<usize>,
     mem_threshold: Option<usize>,
     state: State,
-}
-
-impl Default for LoggerBuilder<LoggerWithoutLogFile> {
-    fn default() -> Self {
-        Self {
-            duration: Default::default(),
-            interval: Default::default(),
-            cpu_threshold: Default::default(),
-            mem_threshold: Default::default(),
-            state: LoggerWithoutLogFile,
-        }
-    }
 }
 
 impl LoggerBuilder {
@@ -48,12 +38,14 @@ impl LoggerBuilder<LoggerWithLogFile> {
             utils::backup_file(&log_file)?;
         }
         let mut cpu_info_iter = CpuInfoIterator::new();
+        let mut mem_info_iter = MemInfoIterator::new();
         loop {
-            let cpu_info = cpu_info_iter
-                .next()
-                .expect("Could not get cpu info");
-            println!("{cpu_info:?}");
-            sleep(std::time::Duration::from_secs(self.interval.unwrap_or(5) as u64))
+            let cpu_info = cpu_info_iter.next().expect("Could not get cpu info");
+            let mem_info = mem_info_iter.next().expect("Could not get mem info");
+            println!("{cpu_info:?}; {mem_info:?}");
+            sleep(std::time::Duration::from_secs(
+                self.interval.unwrap_or(5) as u64
+            ))
         }
     }
 }
