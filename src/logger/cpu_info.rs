@@ -8,7 +8,7 @@ use crate::Error;
 const STAT_FILE_PATH: &str = "/proc/stat";
 
 #[derive(Debug, PartialEq)]
-pub struct CpuInfo {
+pub(crate) struct CpuInfo {
     pub idle_time: usize,
     pub non_idle_time: usize,
 }
@@ -40,7 +40,7 @@ impl FromStr for CpuInfo {
 }
 
 #[derive(Default)]
-pub struct CpuInfoIterator;
+pub(crate) struct CpuInfoIterator;
 
 impl CpuInfoIterator {
     pub fn new() -> Self {

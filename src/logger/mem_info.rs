@@ -8,7 +8,7 @@ use crate::Error;
 const MEMINFO_FILE_PATH: &str = "/proc/meminfo";
 
 #[derive(Debug, PartialEq)]
-pub struct MemInfo {
+pub(crate) struct MemInfo {
     pub total_mem: usize,
     pub free_mem: usize,
     pub available_mem: usize,
@@ -53,7 +53,7 @@ impl FromStr for MemInfo {
 }
 
 #[derive(Default)]
-pub struct MemInfoIterator;
+pub(crate) struct MemInfoIterator;
 
 impl MemInfoIterator {
     pub fn new() -> Self {
