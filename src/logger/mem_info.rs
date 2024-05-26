@@ -38,6 +38,7 @@ impl FromStr for MemInfo {
                 })
         };
 
+        dbg!(s);
         let mut lines_iter = s.lines().take(3);
 
         let total_mem = get_mem_value(lines_iter.next(), "MemTotal:")?;
@@ -68,14 +69,17 @@ impl Iterator for MemInfoIterator {
         let stat_file =
             std::fs::File::open(MEMINFO_FILE_PATH).expect("Could not open /proc/meminfo");
         let reader = BufReader::new(stat_file);
-        let meminfo = reader
+
+        let mem_info = reader
             .lines()
-            .map(|l| l.unwrap())
             .take(3)
+            .flatten()
+            .map(|line| line + "\n")
             .collect::<String>()
             .parse::<MemInfo>()
             .unwrap();
-        Some(meminfo)
+
+        Some(mem_info)
     }
 }
 

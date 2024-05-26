@@ -10,14 +10,14 @@ use self::mem_info::MemInfoIterator;
 pub mod cpu_info;
 pub mod mem_info;
 
-pub struct LoggerWithLogFile {
+pub struct WithLogFile {
     log_file: PathBuf,
 }
 #[derive(Default)]
-pub struct LoggerWithoutLogFile;
+pub struct WithoutLogFile;
 
 #[derive(Debug, Default)]
-pub struct LoggerBuilder<State = LoggerWithoutLogFile> {
+pub struct LoggerBuilder<State = WithoutLogFile> {
     duration: Option<usize>,
     interval: Option<usize>,
     cpu_threshold: Option<usize>,
@@ -26,12 +26,12 @@ pub struct LoggerBuilder<State = LoggerWithoutLogFile> {
 }
 
 impl LoggerBuilder {
-    pub fn new() -> LoggerBuilder<LoggerWithoutLogFile> {
+    pub fn new() -> LoggerBuilder<WithoutLogFile> {
         Default::default()
     }
 }
 
-impl LoggerBuilder<LoggerWithLogFile> {
+impl LoggerBuilder<WithLogFile> {
     pub fn run(self) -> Result<()> {
         let log_file = self.state.log_file;
         if log_file.exists() {
@@ -67,14 +67,14 @@ impl<State> LoggerBuilder<State> {
         let _ = self.mem_threshold.insert(mem_threshold);
         self
     }
-    pub fn with_log_file(self, log_file: &Path) -> LoggerBuilder<LoggerWithLogFile> {
+    pub fn with_log_file(self, log_file: &Path) -> LoggerBuilder<WithLogFile> {
         LoggerBuilder {
             duration: self.duration,
             interval: self.interval,
             cpu_threshold: self.cpu_threshold,
             mem_threshold: self.mem_threshold,
             state: {
-                LoggerWithLogFile {
+                WithLogFile {
                     log_file: log_file.to_path_buf(),
                 }
             },
