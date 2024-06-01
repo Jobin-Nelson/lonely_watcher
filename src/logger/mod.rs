@@ -32,6 +32,7 @@ impl LoggerBuilder {
 }
 
 impl LoggerBuilder<WithLogFile> {
+    // TODO trap keyboard interrupt signal
     pub fn run(self) -> Result<()> {
         let log_file = self.state.log_file;
         if log_file.exists() {
