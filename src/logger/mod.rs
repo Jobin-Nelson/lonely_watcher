@@ -2,7 +2,6 @@ use std::path::{Path, PathBuf};
 use std::thread::sleep;
 
 use crate::prelude::*;
-use crate::utils;
 
 use self::cpu_info::CpuInfoIterator;
 use self::mem_info::MemInfoIterator;
@@ -19,9 +18,9 @@ pub struct WithoutLogFile;
 #[derive(Debug, Default)]
 pub struct LoggerBuilder<State = WithoutLogFile> {
     duration: Option<usize>,
-    interval: Option<usize>,
-    cpu_threshold: Option<usize>,
-    mem_threshold: Option<usize>,
+    interval: Option<u64>,
+    cpu_threshold: Option<u8>,
+    mem_threshold: Option<u8>,
     state: State,
 }
 
@@ -34,19 +33,17 @@ impl LoggerBuilder {
 impl LoggerBuilder<WithLogFile> {
     // TODO trap keyboard interrupt signal
     pub fn run(self) -> Result<()> {
-        let log_file = self.state.log_file;
-        if log_file.exists() {
-            utils::backup_file(&log_file)?;
-        }
+        let interval = match self.interval.unwrap_or_default() {
+            0 => return Err(Error::ZeroIntervalError),
+            i => i,
+        };
         let mut cpu_info_iter = CpuInfoIterator::new();
         let mut mem_info_iter = MemInfoIterator::new();
         loop {
             let cpu_info = cpu_info_iter.next().expect("Could not get cpu info");
             let mem_info = mem_info_iter.next().expect("Could not get mem info");
             println!("{cpu_info:?}; {mem_info:?}");
-            sleep(std::time::Duration::from_secs(
-                self.interval.unwrap_or(5) as u64
-            ))
+            sleep(std::time::Duration::from_secs(interval));
         }
     }
 }
@@ -56,15 +53,15 @@ impl<State> LoggerBuilder<State> {
         self.duration = duration;
         self
     }
-    pub fn with_interval(mut self, interval: usize) -> Self {
+    pub fn with_interval(mut self, interval: u64) -> Self {
         let _ = self.interval.insert(interval);
         self
     }
-    pub fn with_cpu_threshold(mut self, cpu_threshold: usize) -> Self {
+    pub fn with_cpu_threshold(mut self, cpu_threshold: u8) -> Self {
         let _ = self.cpu_threshold.insert(cpu_threshold);
         self
     }
-    pub fn with_mem_threshold(mut self, mem_threshold: usize) -> Self {
+    pub fn with_mem_threshold(mut self, mem_threshold: u8) -> Self {
         let _ = self.mem_threshold.insert(mem_threshold);
         self
     }

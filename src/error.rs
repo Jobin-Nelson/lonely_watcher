@@ -8,6 +8,7 @@ pub enum Error {
     #[from]
     Custom(String),
 
+    ZeroIntervalError,
     BackupFailed{
         source_file: PathBuf,
         destination_file: Option<PathBuf>,
