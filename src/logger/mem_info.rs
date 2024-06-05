@@ -38,7 +38,6 @@ impl FromStr for MemInfo {
                 })
         };
 
-        dbg!(s);
         let mut lines_iter = s.lines().take(3);
 
         let total_mem = get_mem_value(lines_iter.next(), "MemTotal:")?;
