@@ -37,7 +37,7 @@ impl LoggerBuilder<WithLogFile> {
         let mut cpu_info = get_cpu_info();
         let mut mem_info = get_mem_info();
 
-        let interval = self.interval.unwrap();
+        let interval = self.interval.unwrap_or(5);
         loop {
             let cpu_info = cpu_info.next().expect("Could not get cpu info");
             let mem_info = mem_info.next().expect("Could not get mem info");
