@@ -39,14 +39,7 @@ impl FromStr for CpuInfo {
     }
 }
 
-#[derive(Default)]
 pub(crate) struct CpuInfoIterator;
-
-impl CpuInfoIterator {
-    pub fn new() -> Self {
-        Default::default()
-    }
-}
 
 impl Iterator for CpuInfoIterator {
     type Item = CpuInfo;
@@ -67,6 +60,11 @@ impl Iterator for CpuInfoIterator {
         Some(cpu_info)
     }
 }
+
+pub(crate) fn get_cpu_info() -> CpuInfoIterator {
+    CpuInfoIterator
+}
+
 
 #[cfg(test)]
 mod tests {

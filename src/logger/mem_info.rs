@@ -52,14 +52,7 @@ impl FromStr for MemInfo {
     }
 }
 
-#[derive(Default)]
 pub(crate) struct MemInfoIterator;
-
-impl MemInfoIterator {
-    pub fn new() -> Self {
-        Default::default()
-    }
-}
 
 impl Iterator for MemInfoIterator {
     type Item = MemInfo;
@@ -81,6 +74,11 @@ impl Iterator for MemInfoIterator {
         Some(mem_info)
     }
 }
+
+pub(crate) fn get_mem_info() -> MemInfoIterator {
+    MemInfoIterator
+}
+
 
 #[cfg(test)]
 mod tests {

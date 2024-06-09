@@ -3,8 +3,8 @@ use std::thread::sleep;
 
 use crate::prelude::*;
 
-use self::cpu_info::CpuInfoIterator;
-use self::mem_info::MemInfoIterator;
+use self::cpu_info::get_cpu_info;
+use self::mem_info::get_mem_info;
 
 pub mod cpu_info;
 pub mod mem_info;
@@ -37,11 +37,12 @@ impl LoggerBuilder<WithLogFile> {
             0 => return Err(Error::ZeroIntervalError),
             i => i,
         };
-        let mut cpu_info_iter = CpuInfoIterator::new();
-        let mut mem_info_iter = MemInfoIterator::new();
+        // TODO abstract loggers into a plugin system
+        let mut cpu_info = get_cpu_info();
+        let mut mem_info = get_mem_info();
         loop {
-            let cpu_info = cpu_info_iter.next().expect("Could not get cpu info");
-            let mem_info = mem_info_iter.next().expect("Could not get mem info");
+            let cpu_info = cpu_info.next().expect("Could not get cpu info");
+            let mem_info = mem_info.next().expect("Could not get mem info");
             println!("{cpu_info:?}; {mem_info:?}");
             sleep(std::time::Duration::from_secs(interval));
         }
