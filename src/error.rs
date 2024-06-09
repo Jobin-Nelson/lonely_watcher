@@ -8,7 +8,7 @@ pub enum Error {
     #[from]
     Custom(String),
 
-    ZeroIntervalError,
+    LoggerValidationError(String),
     BackupFailed{
         source_file: PathBuf,
         destination_file: Option<PathBuf>,
@@ -18,6 +18,7 @@ pub enum Error {
     #[from]
     Io(std::io::Error),
 }
+
 
 // begin region: -- Custom
 impl Error {

@@ -19,10 +19,10 @@ fn main() -> Result<()> {
 
             LoggerBuilder::new()
                 .with_duration(duration)
-                .with_interval(interval)
-                .with_cpu_threshold(cpu_threshold)
-                .with_mem_threshold(mem_threshold)
-                .with_log_file(&log_file)
+                .with_interval(interval)?
+                .with_cpu_threshold(cpu_threshold)?
+                .with_mem_threshold(mem_threshold)?
+                .with_log_file(&log_file)?
                 .run()?;
         }
         cli::Commands::Stat { .. } => todo!(),
