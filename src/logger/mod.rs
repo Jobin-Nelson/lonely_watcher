@@ -1,6 +1,8 @@
 use std::path::{Path, PathBuf};
 use std::thread::sleep;
 
+use tracing::info;
+
 use crate::prelude::*;
 
 use self::cpu_info::get_cpu_info;
@@ -34,15 +36,23 @@ impl LoggerBuilder<WithLogFile> {
     // TODO trap keyboard interrupt signal
     pub fn run(self) -> Result<()> {
         // TODO abstract loggers into a plugin system
-        let mut cpu_info = get_cpu_info();
-        let mut mem_info = get_mem_info();
+        let mut cpu_info_iter = get_cpu_info();
+        let mut mem_info_iter = get_mem_info();
+
+        tracing_subscriber::fmt().json().init();
 
         let interval = self.interval.unwrap_or(5);
+        let mut prev_cpu_info = cpu_info_iter.next().expect("Could not get cpu info");
+
         loop {
-            let cpu_info = cpu_info.next().expect("Could not get cpu info");
-            let mem_info = mem_info.next().expect("Could not get mem info");
-            println!("{cpu_info:?}; {mem_info:?}");
             sleep(std::time::Duration::from_secs(interval));
+            let cpu_percent = cpu_info_iter
+                .next()
+                .expect("Could not get cpu info")
+                .get_cpu_usage(&mut prev_cpu_info);
+            let mem_info = mem_info_iter.next().expect("Could not get mem info");
+
+            info!(cpu = cpu_percent, mem = ?mem_info);
         }
     }
 }

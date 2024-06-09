@@ -7,10 +7,27 @@ use crate::Error;
 
 const STAT_FILE_PATH: &str = "/proc/stat";
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Default, PartialEq)]
 pub(crate) struct CpuInfo {
     pub idle_time: usize,
     pub non_idle_time: usize,
+}
+
+impl CpuInfo {
+    pub fn get_cpu_usage(self, prev_cpu_info: &mut CpuInfo) -> usize {
+        let total_cpu_time = self.idle_time + self.non_idle_time;
+        let prev_total_cpu_time = prev_cpu_info.idle_time + prev_cpu_info.non_idle_time;
+        dbg!(&prev_cpu_info);
+        dbg!(&self);
+
+        let total_cpu_delta_time = total_cpu_time - prev_total_cpu_time;
+        let idle_cpu_delta_time = self.idle_time - prev_cpu_info.idle_time;
+        *prev_cpu_info = self;
+
+        ((total_cpu_delta_time - idle_cpu_delta_time) * 100)
+            .checked_div(total_cpu_delta_time)
+            .unwrap_or(0)
+    }
 }
 
 impl FromStr for CpuInfo {
@@ -64,7 +81,6 @@ impl Iterator for CpuInfoIterator {
 pub(crate) fn get_cpu_info() -> CpuInfoIterator {
     CpuInfoIterator
 }
-
 
 #[cfg(test)]
 mod tests {
