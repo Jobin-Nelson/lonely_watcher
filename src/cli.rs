@@ -21,14 +21,14 @@ pub enum Commands {
         #[arg(short, long)]
         duration: Option<usize>,
         /// Interval in seconds
-        #[arg(short, long, default_value_t = 5, value_parser = clap::value_parser!(u64).range(1..))]
-        interval: u64,
+        #[arg(short, long, default_value_t = 5, value_parser = clap::value_parser!(usize).range(1..))]
+        interval: usize,
         /// CPU threshold in percent
-        #[arg(short, long, default_value_t = 90, value_parser = clap::value_parser!(u8).range(0..=100))]
-        cpu_threshold: u8,
+        #[arg(short, long, default_value_t = 90, value_parser = clap::value_parser!(usize).range(0..=100))]
+        cpu_threshold: usize,
         /// Memory threshold in percent
-        #[arg(short, long, default_value_t = 90, value_parser = clap::value_parser!(u8).range(0..=100))]
-        mem_threshold: u8,
+        #[arg(short, long, default_value_t = 90, value_parser = clap::value_parser!(usize).range(0..=100))]
+        mem_threshold: usize,
     },
     /// Stat performance data
     Stat {

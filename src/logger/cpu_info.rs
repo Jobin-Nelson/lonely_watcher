@@ -17,11 +17,10 @@ impl CpuInfo {
     pub fn get_cpu_usage(self, prev_cpu_info: &mut CpuInfo) -> usize {
         let total_cpu_time = self.idle_time + self.non_idle_time;
         let prev_total_cpu_time = prev_cpu_info.idle_time + prev_cpu_info.non_idle_time;
-        dbg!(&prev_cpu_info);
-        dbg!(&self);
 
         let total_cpu_delta_time = total_cpu_time - prev_total_cpu_time;
         let idle_cpu_delta_time = self.idle_time - prev_cpu_info.idle_time;
+
         *prev_cpu_info = self;
 
         ((total_cpu_delta_time - idle_cpu_delta_time) * 100)

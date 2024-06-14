@@ -14,6 +14,12 @@ pub(crate) struct MemInfo {
     pub available_mem: usize,
 }
 
+impl MemInfo {
+    pub fn get_mem_usage(&self) -> usize {
+        ((self.total_mem - self.available_mem) * 100) / self.total_mem
+    }
+}
+
 impl FromStr for MemInfo {
     type Err = Error;
 
@@ -33,7 +39,7 @@ impl FromStr for MemInfo {
                 .parse::<usize>()
                 .map_err(|e| {
                     Error::ParseMemError(format!(
-                        "Expected integer value for {prefix}, failed due to {e}"
+                        "Expected integer value for {prefix}, got {e}"
                     ))
                 })
         };
