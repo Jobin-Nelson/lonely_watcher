@@ -50,7 +50,7 @@ impl Logger {
                 .get_cpu_usage(&mut prev_cpu_info);
             let mem_percent = mem_info_iter
                 .next()
-                .expect("Could not get mem info")
+                .expect("Could not get mem info")main
                 .get_mem_usage();
 
             if cpu_percent >= self.cpu_threshold || mem_percent >= self.mem_threshold {
