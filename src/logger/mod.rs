@@ -20,7 +20,13 @@ struct Logger {
 }
 
 impl Logger {
-    pub fn new(duration: Option<usize>, interval: Option<usize>, cpu_threshold: Option<usize>, mem_threshold: Option<usize>, log_file: PathBuf) -> Self {
+    pub fn new(
+        duration: Option<usize>,
+        interval: Option<usize>,
+        cpu_threshold: Option<usize>,
+        mem_threshold: Option<usize>,
+        log_file: PathBuf,
+    ) -> Self {
         Self {
             duration: duration.unwrap_or_default(),
             interval: interval.unwrap_or(5),
